@@ -9,19 +9,24 @@
     "calculateExercises": "ts-node exerciseCalculator.ts",
     "tsc": "tsc",
     "start": "node index.ts",
-    "dev": "concurrently \"tsc --watch\" \"node --watch index.ts\""
+    "dev": "concurrently \"tsc --watch\" \"node --watch index.ts\"",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@types/express": "^latest",
-    "@types/node": "^26.1.2",
-    "concurrently": "^latest",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
-  },
   "dependencies": {
-    "express": "^latest"
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/express": "^5.0.3",
+    "@types/node": "^26.1.2",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.66.0"
   }
 }
