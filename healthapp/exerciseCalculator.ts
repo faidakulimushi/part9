@@ -1,5 +1,3 @@
-import { isNotNumber } from "./utils.ts";
-
 interface Result {
   periodLength: number;
   trainingDays: number;
@@ -10,10 +8,11 @@ interface Result {
   average: number;
 }
 
-const calculateExercises = (
+export const calculateExercises = (
   dailyHours: number[],
   target: number
 ): Result => {
+
   const periodLength = dailyHours.length;
 
   const trainingDays = dailyHours.filter(day => day > 0).length;
@@ -48,29 +47,24 @@ const calculateExercises = (
   };
 };
 
-try {
-  if (process.argv.length < 4) {
-    throw new Error("Please provide target and exercise hours.");
+if (process.argv[1] === import.meta.filename) {
+  try {
+    if (process.argv.length < 4) {
+      throw new Error("Please provide a target and exercise hours.");
+    }
+
+    const target = Number(process.argv[2]);
+    const dailyHours = process.argv.slice(3).map(Number);
+
+    console.log(calculateExercises(dailyHours, target));
+
+  } catch (error: unknown) {
+    let errorMessage = "Something went wrong.";
+
+    if (error instanceof Error) {
+      errorMessage += " " + error.message;
+    }
+
+    console.log(errorMessage);
   }
-
-  const values = process.argv.slice(2);
-
-  if (values.some(isNotNumber)) {
-    throw new Error("Provided values were not numbers!");
-  }
-
-  const target = Number(values[0]);
-  const dailyHours = values.slice(1).map(Number);
-
-  console.log(calculateExercises(dailyHours, target));
-} catch (error: unknown) {
-  let errorMessage = "Something went wrong.";
-
-  if (error instanceof Error) {
-    errorMessage += " " + error.message;
-  }
-
-  console.log(errorMessage);
 }
-
-export { calculateExercises };
