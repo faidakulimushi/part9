@@ -22,9 +22,9 @@ jobs:
       run: npm install
 
     - name: Install test dependencies
-      working-directory: tests
+      working-directory: healthapp-tests
       run: npm install
 
     - name: Run E2E tests
-      working-directory: tests
+      working-directory: healthapp-tests
       run: npm test
