@@ -1,4 +1,4 @@
-name: Health app E2E Tests
+name: Healthapp Playwright Tests
 
 on:
   push:
@@ -9,22 +9,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v5
-      with:
-        node-version: '24'
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
 
-    - name: Install healthapp dependencies
-      working-directory: healthapp
-      run: npm install
+      - name: Install healthapp dependencies
+        working-directory: healthapp
+        run: npm install
 
-    - name: Install test dependencies
-      working-directory: healthapp-tests
-      run: npm install
+      - name: Install Playwright dependencies
+        working-directory: healthapp-tests
+        run: |
+          npm install
+          npx playwright install --with-deps
 
-    - name: Run E2E tests
-      working-directory: healthapp-tests
-      run: npm test
+      - name: Start backend and run Playwright tests
+        run: |
+          cd healthapp
+          npm run start &
+          for i in $(seq 1 30); do
+            curl -sSf http://127.0.0.1:3000/ping >/dev/null 2>&1 && break
+            echo "waiting for backend..."
+            sleep 1
+          done
+          cd ../healthapp-tests
+          npm test
