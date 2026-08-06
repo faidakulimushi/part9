@@ -5,21 +5,22 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "tsc": "tsc",
-    "dev": "concurrently \"tsc --watch\" \"node --watch --experimental-transform-types src/index.ts\"",
-    "start": "node --experimental-transform-types  src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "dev": "concurrently \"tsc --watch -p tsconfig.json\" \"tsx watch src/index.ts\"",
+    "start": "node dist/index.js",
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@stylistic/eslint-plugin": "^5.10.0",
+    "@eslint/js": "^9.39.4",
     "@types/express": "^5.0.6",
+    "@types/node": "^24.10.0",
     "concurrently": "^9.2.1",
-    "eslint": "^10.1.0",
-    "typescript": "^6.0.2",
-    "typescript-eslint": "^8.57.2"
+    "eslint": "^9.39.4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1"
   },
   "dependencies": {
     "express": "^5.2.1",
