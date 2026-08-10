@@ -1,6 +1,15 @@
-import express from "express";
+ import express, {
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
 import cors from "cors";
+import { z } from "zod";
 import patientService from "./services/patientService";
+import {
+  NewPatientSchema,
+  type NewPatient,
+} from "./types";
 
 const app = express();
 
@@ -19,18 +28,42 @@ app.get("/api/diagnoses", (_req, res) => {
   res.json(patientService.getDiagnoses());
 });
 
-app.post("/api/patients", (req, res) => {
+const newPatientParser = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
   try {
+    NewPatientSchema.parse(req.body);
+    next();
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+app.post(
+  "/api/patients",
+  newPatientParser,
+  (req: Request<unknown, unknown, NewPatient>, res: Response) => {
     const newPatient = patientService.addPatient(req.body);
     res.json(newPatient);
-  } catch (error) {
-    if (error instanceof Error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    return res.status(400).json({ error: "Invalid request data" });
   }
-});
+);
+
+const errorMiddleware = (
+  error: unknown,
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (error instanceof z.ZodError) {
+    res.status(400).send({ error: error.issues });
+  } else {
+    next(error);
+  }
+};
+
+app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 3001;
 
