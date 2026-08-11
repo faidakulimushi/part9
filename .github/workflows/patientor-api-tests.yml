@@ -58,4 +58,4 @@ jobs:
         run: |
           if [ -f server.pid ]; then
             kill $(cat server.pid) || true
-          fi
+          fi# Patientor API tests workflow
