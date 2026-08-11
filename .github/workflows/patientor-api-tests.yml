@@ -2,7 +2,7 @@ name: Patientor API Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   test:
@@ -25,12 +25,35 @@ jobs:
         working-directory: ./patientor/backend
         run: npm run lint
 
+      - name: Build patientor backend
+        working-directory: ./patientor/backend
+        run: npm run build
+
       - name: Start patientor backend server
         working-directory: ./patientor/backend
         run: |
-          npm start &
+          set -euo pipefail
+          npm start > server.log 2>&1 &
           echo $! > server.pid
-          sleep 3
+
+          for i in $(seq 1 15); do
+            if curl --silent --fail http://localhost:3001/api/ping; then
+              echo "Backend is ready"
+              exit 0
+            fi
+
+            if ! kill -0 "$(cat server.pid)" >/dev/null 2>&1; then
+              echo "Backend process died. Server log:"
+              cat server.log
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+          echo "Backend did not start in time"
+          cat server.log
+          exit 1
 
       - name: Install test dependencies
         working-directory: ./patientor-api-tests
@@ -45,8 +68,8 @@ jobs:
         run: npm test
 
       - name: Upload test report
-        uses: actions/upload-artifact@v5
         if: always()
+        uses: actions/upload-artifact@v5
         with:
           name: playwright-report
           path: patientor-api-tests/playwright-report/
@@ -57,5 +80,6 @@ jobs:
         working-directory: ./patientor/backend
         run: |
           if [ -f server.pid ]; then
-            kill $(cat server.pid) || true
-          fi# Patientor API tests workflow
+            kill "$(cat server.pid)" || true
+          fi
+

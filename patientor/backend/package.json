@@ -1,31 +1,31 @@
-{
-  "name": "patientor-backend",
-  "version": "1.0.0",
-  "description": "Patientor backend for Full Stack Open exercise 9.9",
-  "main": "build/index.js",
-  "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc",
-    "start": "node build/index.js",
-    "lint": "eslint . --ext .ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "uuid": "^14.0.1",
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.17",
-    "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.17.0",
-    "@typescript-eslint/parser": "^6.17.0",
-    "eslint": "^8.50.0",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.2"
-  }
+ {
+"name": "patientor-backend",
+"version": "1.0.0",
+"description": "Patientor backend for Full Stack Open exercise 9.9",
+"main": "build/index.js",
+"scripts": {
+"dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+"build": "tsc",
+"start": "node build/index.js",
+"lint": "eslint ."
+},
+"keywords": [],
+"author": "",
+"license": "ISC",
+"dependencies": {
+"cors": "^2.8.5",
+"express": "^4.18.2",
+"uuid": "^14.0.1",
+"zod": "^4.4.3"
+},
+"devDependencies": {
+"@types/cors": "^2.8.17",
+"@types/express": "^4.17.17",
+"@types/node": "^20.0.0",
+"@typescript-eslint/eslint-plugin": "^6.17.0",
+"@typescript-eslint/parser": "^6.17.0",
+"eslint": "^8.50.0",
+"ts-node-dev": "^2.0.0",
+"typescript": "^5.9.2"
+}
 }

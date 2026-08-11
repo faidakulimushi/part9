@@ -16,7 +16,7 @@ const patients: Patient[] = [
     occupation: "Teacher",
     gender: "female",
     ssn: "987-65-4321",
-    dateOfBirth: "1985-05-05",
+    dateOfBirth: "1985-05-05", 
   },
 ];
 
@@ -77,7 +77,13 @@ const toNewPatient = (object: unknown): NewPatient => {
 const getPatients = (): Patient[] => patients;
 
 const getNonSensitivePatients = (): NonSensitivePatient[] => {
-  return patients.map(({ ssn, ...patient }) => patient);
+  return patients.map((patient) => {
+    // disable unused variable warning for ssn because it is intentionally omitted
+    // when returning non-sensitive patient data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { ssn, ...nonSensitivePatient } = patient;
+    return nonSensitivePatient;
+  });
 };
 
 const getDiagnoses = () => diagnoses;
@@ -96,7 +102,7 @@ const addPatient = (patient: NewPatient): Patient => {
 };
 
 export default {
-  getPatients,
+  getPatients, 
   getNonSensitivePatients,
   getDiagnoses,
   addPatient,
