@@ -1,25 +1,34 @@
 import { useState } from "react";
-import { Box, Table, Button, TableHead, Typography, TableCell, TableRow, TableBody } from '@mui/material';
-import axios from 'axios';
+import {
+  Box,
+  Table,
+  Button,
+  TableHead,
+  Typography,
+  TableCell,
+  TableRow,
+  TableBody,
+} from "@mui/material";
+import axios from "axios";
+import { Link } from "react-router-dom";
 
-import { PatientFormValues, Patient } from "../../types";
+import { PatientFormValues, NonSensitivePatient } from "../../types";
 import AddPatientModal from "../AddPatientModal";
-
 import HealthRatingBar from "../HealthRatingBar";
-
 import patientService from "../../services/patients";
 
 interface Props {
-  patients : Patient[]
-  setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
+  patients: NonSensitivePatient[];
+  setPatients: React.Dispatch<React.SetStateAction<NonSensitivePatient[]>>;
 }
 
-const PatientListPage = ({ patients, setPatients } : Props ) => {
-
+const PatientListPage = ({ patients, setPatients }: Props) => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
-  const openModal = (): void => setModalOpen(true);
+  const openModal = (): void => {
+    setModalOpen(true);
+  };
 
   const closeModal = (): void => {
     setModalOpen(false);
@@ -29,19 +38,43 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
   const submitNewPatient = async (values: PatientFormValues) => {
     try {
       const patient = await patientService.create(values);
-      setPatients(patients.concat(patient));
+
+      const nonSensitivePatient: NonSensitivePatient = {
+        id: patient.id,
+        name: patient.name,
+        occupation: patient.occupation,
+        gender: patient.gender,
+        dateOfBirth: patient.dateOfBirth,
+      };
+
+      setPatients((previousPatients) =>
+        previousPatients.concat(nonSensitivePatient)
+      );
+
       setModalOpen(false);
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
-        if (e?.response?.data && typeof e?.response?.data === "string") {
-          const message = e.response.data.replace('Something went wrong. Error: ', '');
-          console.error(message);
-          setError(message);
+        console.error("Axios error:", e.response?.data);
+
+        if (e.response?.data) {
+          const data = e.response.data;
+
+          if (typeof data === "string") {
+            setError(data);
+          } else if (
+            typeof data === "object" &&
+            data !== null &&
+            "error" in data
+          ) {
+            setError(String(data.error));
+          } else {
+            setError("Something went wrong when adding the patient");
+          }
         } else {
-          setError("Unrecognized axios error");
+          setError("Could not connect to the backend");
         }
       } else {
-        console.error("Unknown error", e);
+        console.error("Unknown error:", e);
         setError("Unknown error");
       }
     }
@@ -54,6 +87,7 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
           Patient list
         </Typography>
       </Box>
+
       <Table sx={{ marginBottom: "1em" }}>
         <TableHead>
           <TableRow>
@@ -63,12 +97,23 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
             <TableCell>Health Rating</TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
-          {Object.values(patients).map((patient: Patient) => (
+          {patients.map((patient) => (
             <TableRow key={patient.id}>
-              <TableCell>{patient.name}</TableCell>
+              <TableCell>
+                <Button
+                  component={Link}
+                  to={`/patients/${patient.id}`}
+                >
+                  {patient.name}
+                </Button>
+              </TableCell>
+
               <TableCell>{patient.gender}</TableCell>
+
               <TableCell>{patient.occupation}</TableCell>
+
               <TableCell>
                 <HealthRatingBar showText={false} rating={1} />
               </TableCell>
@@ -76,13 +121,15 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
           ))}
         </TableBody>
       </Table>
+
       <AddPatientModal
         modalOpen={modalOpen}
         onSubmit={submitNewPatient}
         error={error}
         onClose={closeModal}
       />
-      <Button variant="contained" onClick={() => openModal()}>
+
+      <Button variant="contained" onClick={openModal}>
         Add New Patient
       </Button>
     </div>

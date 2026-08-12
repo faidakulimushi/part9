@@ -1,4 +1,4 @@
- import { z } from "zod";
+import { z } from "zod";
 
 export const GenderValues = {
   Male: "male",
@@ -17,8 +17,8 @@ export interface Patient {
   name: string;
   occupation: string;
   gender: Gender;
-  ssn?: string;
-  dateOfBirth?: string;
+  ssn: string;
+  dateOfBirth: string;
   entries: Entry[];
 }
 
@@ -28,8 +28,8 @@ export const NewPatientSchema = z.object({
   name: z.string(),
   occupation: z.string(),
   gender: z.enum(GenderValues),
-  ssn: z.string().optional(),
-  dateOfBirth: z.string().optional(),
+  ssn: z.string(),
+  dateOfBirth: z.string(),
 });
 
 export type NewPatient = z.infer<typeof NewPatientSchema>;
