@@ -1,4 +1,4 @@
- import express, {
+import express, {
   type Request,
   type Response,
   type NextFunction,
@@ -22,6 +22,18 @@ app.get("/api/ping", (_req, res) => {
 
 app.get("/api/patients", (_req, res) => {
   res.json(patientService.getNonSensitivePatients());
+});
+
+app.get("/api/patients/:id", (req, res) => {
+  const patient = patientService.getPatientById(req.params.id);
+
+  if (patient) {
+    res.json(patient);
+  } else {
+    res.status(404).send({
+      error: "Patient not found",
+    });
+  }
 });
 
 app.get("/api/diagnoses", (_req, res) => {

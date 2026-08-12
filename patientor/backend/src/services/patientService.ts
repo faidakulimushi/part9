@@ -1,4 +1,4 @@
-import { Patient, NonSensitivePatient, NewPatient } from "../types";
+ import { Patient, NonSensitivePatient, NewPatient } from "../types";
 import { v1 as uuid } from "uuid";
 
 const patients: Patient[] = [
@@ -9,6 +9,7 @@ const patients: Patient[] = [
     gender: "male",
     ssn: "123-45-6789",
     dateOfBirth: "1990-01-01",
+    entries: [],
   },
   {
     id: "2",
@@ -16,7 +17,8 @@ const patients: Patient[] = [
     occupation: "Teacher",
     gender: "female",
     ssn: "987-65-4321",
-    dateOfBirth: "1985-05-05", 
+    dateOfBirth: "1985-05-05",
+    entries: [],
   },
 ];
 
@@ -77,13 +79,17 @@ const toNewPatient = (object: unknown): NewPatient => {
 const getPatients = (): Patient[] => patients;
 
 const getNonSensitivePatients = (): NonSensitivePatient[] => {
-  return patients.map((patient) => {
-    // disable unused variable warning for ssn because it is intentionally omitted
-    // when returning non-sensitive patient data
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { ssn, ...nonSensitivePatient } = patient;
-    return nonSensitivePatient;
-  });
+  return patients.map((patient) => ({
+    id: patient.id,
+    name: patient.name,
+    occupation: patient.occupation,
+    gender: patient.gender,
+    dateOfBirth: patient.dateOfBirth,
+  }));
+};
+
+const getPatientById = (id: string): Patient | undefined => {
+  return patients.find((patient) => patient.id === id);
 };
 
 const getDiagnoses = () => diagnoses;
@@ -94,6 +100,7 @@ const addPatient = (patient: NewPatient): Patient => {
   const newPatient: Patient = {
     id: uuid(),
     ...newPatientEntry,
+    entries: [],
   };
 
   patients.push(newPatient);
@@ -102,8 +109,9 @@ const addPatient = (patient: NewPatient): Patient => {
 };
 
 export default {
-  getPatients, 
+  getPatients,
   getNonSensitivePatients,
+  getPatientById,
   getDiagnoses,
   addPatient,
 };
