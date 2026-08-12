@@ -1,6 +1,6 @@
 import express, { type Request, type Response } from 'express';
 import diaryService from '../services/diaryService.js';
-import type { NonSensitiveDiaryEntry } from '../types.js';
+import type { NewDiaryEntry, NonSensitiveDiaryEntry } from '../types.js';
 
 const router = express.Router();
 
@@ -9,8 +9,9 @@ router.get('/', (_req: Request, res: Response<NonSensitiveDiaryEntry[]>) => {
   res.json(data);
 });
 
-router.post('/', (_req: Request, res: Response) => {
-  res.send('add a new diary');
+router.post('/', (req: Request<unknown, unknown, NewDiaryEntry>, res: Response) => {
+  const newDiary = diaryService.addDiary(req.body);
+  res.json(newDiary);
 });
 
 export default router;

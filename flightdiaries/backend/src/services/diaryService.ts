@@ -1,5 +1,5 @@
-import diaryData from '../../data/entries.json' with { type: 'json' };
-import type { DiaryEntry, NonSensitiveDiaryEntry } from '../types.js';
+ import diaryData from '../../data/entries.json' with { type: 'json' };
+import type { DiaryEntry, NewDiaryEntry, NonSensitiveDiaryEntry } from '../types.js';
 
 const getEntries = (): DiaryEntry[] => {
   return diaryData as DiaryEntry[];
@@ -11,11 +11,18 @@ const getNonSensitiveEntries = (): NonSensitiveDiaryEntry[] => {
     date,
     weather,
     visibility,
-  })) as NonSensitiveDiaryEntry[];
+  }));
 };
 
-const addDiary = (): DiaryEntry | null => {
-  return null;
+const addDiary = (entry: NewDiaryEntry): DiaryEntry => {
+  const newDiaryEntry: DiaryEntry = {
+    id: Math.max(...diaryData.map((entry) => entry.id)) + 1,
+    ...entry,
+  };
+
+  diaryData.push(newDiaryEntry);
+
+  return newDiaryEntry;
 };
 
 export default {

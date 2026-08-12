@@ -10,8 +10,13 @@ const getNonSensitiveEntries = () => {
         visibility,
     }));
 };
-const addDiary = () => {
-    return null;
+const addDiary = (entry) => {
+    const newDiaryEntry = {
+        id: Math.max(...diaryData.map((entry) => entry.id)) + 1,
+        ...entry,
+    };
+    diaryData.push(newDiaryEntry);
+    return newDiaryEntry;
 };
 export default {
     getEntries,
