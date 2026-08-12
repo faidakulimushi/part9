@@ -1,9 +1,22 @@
-import { z } from 'zod';
+ import { z } from 'zod';
 
-export const Weather = ['sunny', 'rainy', 'cloudy', 'stormy', 'windy'] as const;
+export const Weather = [
+  'sunny',
+  'rainy',
+  'cloudy',
+  'stormy',
+  'windy',
+] as const;
+
 export type Weather = (typeof Weather)[number];
 
-export const Visibility = ['great', 'good', 'ok', 'poor'] as const;
+export const Visibility = [
+  'great',
+  'good',
+  'ok',
+  'poor',
+] as const;
+
 export type Visibility = (typeof Visibility)[number];
 
 export const NewEntrySchema = z.object({

@@ -1,20 +1,33 @@
- import { useEffect, useState } from 'react';
+ import { useEffect, useState, type FormEvent } from 'react';
 import './App.css';
+
+type Visibility = 'great' | 'good' | 'ok' | 'poor';
+type Weather = 'sunny' | 'rainy' | 'cloudy' | 'stormy' | 'windy';
 
 interface DiaryEntry {
   id: number;
   date: string;
-  weather: string;
-  visibility: string;
+  weather: Weather;
+  visibility: Visibility;
   comment?: string;
 }
 
 interface NewDiaryEntry {
   date: string;
-  visibility: string;
-  weather: string;
+  visibility: Visibility;
+  weather: Weather;
   comment: string;
 }
+
+const visibilityOptions: Visibility[] = ['great', 'good', 'ok', 'poor'];
+
+const weatherOptions: Weather[] = [
+  'sunny',
+  'rainy',
+  'cloudy',
+  'stormy',
+  'windy',
+];
 
 const App = () => {
   const [diaries, setDiaries] = useState<DiaryEntry[]>([]);
@@ -38,7 +51,7 @@ const App = () => {
     void fetchDiaries();
   }, []);
 
-  const addDiary = async (event: React.FormEvent) => {
+  const addDiary = async (event: FormEvent) => {
     event.preventDefault();
 
     setError(null);
@@ -98,28 +111,44 @@ const App = () => {
 
         <div>
           visibility
-          <input
-            value={newEntry.visibility}
-            onChange={(event) =>
-              setNewEntry({
-                ...newEntry,
-                visibility: event.target.value,
-              })
-            }
-          />
+          {visibilityOptions.map((visibilityOption) => (
+            <label key={visibilityOption}>
+              {visibilityOption}
+              <input
+                type="radio"
+                name="visibility"
+                value={visibilityOption}
+                checked={newEntry.visibility === visibilityOption}
+                onChange={() =>
+                  setNewEntry({
+                    ...newEntry,
+                    visibility: visibilityOption,
+                  })
+                }
+              />
+            </label>
+          ))}
         </div>
 
         <div>
           weather
-          <input
-            value={newEntry.weather}
-            onChange={(event) =>
-              setNewEntry({
-                ...newEntry,
-                weather: event.target.value,
-              })
-            }
-          />
+          {weatherOptions.map((weatherOption) => (
+            <label key={weatherOption}>
+              {weatherOption}
+              <input
+                type="radio"
+                name="weather"
+                value={weatherOption}
+                checked={newEntry.weather === weatherOption}
+                onChange={() =>
+                  setNewEntry({
+                    ...newEntry,
+                    weather: weatherOption,
+                  })
+                }
+              />
+            </label>
+          ))}
         </div>
 
         <div>
