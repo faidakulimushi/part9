@@ -232,7 +232,7 @@ const App = () => {
   >([]);
 
   useEffect(() => {
-    void axios.get<void>(`${apiBaseUrl}/ping`);
+    void axios.get(`${apiBaseUrl}/ping`);
 
     const fetchPatientList = async () => {
       const patients = await patientService.getAll();

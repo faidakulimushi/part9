@@ -7,13 +7,13 @@ import {
 } from "@mui/material";
 
 import AddEntryForm, {
-  NewHealthCheckEntryValues,
+  NewEntryValues,
 } from "./AddEntryForm";
 
 interface Props {
   modalOpen: boolean;
   onClose: () => void;
-  onSubmit: (values: NewHealthCheckEntryValues) => void;
+  onSubmit: (values: NewEntryValues) => void;
   error?: string;
 }
 
@@ -33,7 +33,11 @@ const AddEntryModal = ({
     <Divider />
 
     <DialogContent>
-      {error && <Alert severity="error">{error}</Alert>}
+      {error && (
+        <Alert severity="error">
+          {error}
+        </Alert>
+      )}
 
       <AddEntryForm
         onSubmit={onSubmit}
