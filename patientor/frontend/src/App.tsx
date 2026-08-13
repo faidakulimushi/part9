@@ -10,12 +10,20 @@ import {
 import { Button, Divider, Container, Typography } from "@mui/material";
 
 import { apiBaseUrl } from "./constants";
-import { NonSensitivePatient, Patient } from "./types";
+import {
+  NonSensitivePatient,
+  Patient,
+  Diagnosis,
+} from "./types";
 
 import patientService from "./services/patients";
 import PatientListPage from "./components/PatientListPage";
 
-const PatientPage = () => {
+const PatientPage = ({
+  diagnoses,
+}: {
+  diagnoses: Diagnosis[];
+}) => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient>();
 
@@ -74,9 +82,17 @@ const PatientPage = () => {
 
           {entry.diagnosisCodes && (
             <ul>
-              {entry.diagnosisCodes.map((code) => (
-                <li key={code}>{code}</li>
-              ))}
+              {entry.diagnosisCodes.map((code) => {
+                const diagnosis = diagnoses.find(
+                  (item) => item.code === code
+                );
+
+                return (
+                  <li key={code}>
+                    {code} {diagnosis ? diagnosis.name : ""}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -87,6 +103,7 @@ const PatientPage = () => {
 
 const App = () => {
   const [patients, setPatients] = useState<NonSensitivePatient[]>([]);
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
 
   useEffect(() => {
     void axios.get<void>(`${apiBaseUrl}/ping`);
@@ -96,7 +113,16 @@ const App = () => {
       setPatients(patients);
     };
 
+    const fetchDiagnoses = async () => {
+      const response = await axios.get<Diagnosis[]>(
+        `${apiBaseUrl}/diagnoses`
+      );
+
+      setDiagnoses(response.data);
+    };
+
     void fetchPatientList();
+    void fetchDiagnoses();
   }, []);
 
   return (
@@ -131,7 +157,7 @@ const App = () => {
 
             <Route
               path="/patients/:id"
-              element={<PatientPage />}
+              element={<PatientPage diagnoses={diagnoses} />}
             />
           </Routes>
         </Container>
