@@ -7,7 +7,12 @@ import {
   Routes,
   useParams,
 } from "react-router-dom";
-import { Button, Divider, Container, Typography } from "@mui/material";
+import {
+  Button,
+  Divider,
+  Container,
+  Typography,
+} from "@mui/material";
 
 import { apiBaseUrl } from "./constants";
 import {
@@ -19,6 +24,8 @@ import {
 import patientService from "./services/patients";
 import PatientListPage from "./components/PatientListPage";
 import EntryDetails from "./components/EntryDetails";
+import AddEntryModal from "./components/AddEntryModal";
+import { NewHealthCheckEntryValues } from "./components/AddEntryForm";
 
 const PatientPage = ({
   diagnoses,
@@ -26,7 +33,10 @@ const PatientPage = ({
   diagnoses: Diagnosis[];
 }) => {
   const { id } = useParams<{ id: string }>();
+
   const [patient, setPatient] = useState<Patient>();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -43,6 +53,88 @@ const PatientPage = ({
 
     void fetchPatient();
   }, [id]);
+
+  const openModal = () => {
+    setModalOpen(true);
+    setError(undefined);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setError(undefined);
+  };
+
+  const submitNewEntry = async (
+    values: NewHealthCheckEntryValues
+  ) => {
+    if (!id) {
+      return;
+    }
+
+    try {
+      const response = await axios.post<Patient>(
+        `${apiBaseUrl}/patients/${id}/entries`,
+        values
+      );
+
+      setPatient(response.data);
+      setModalOpen(false);
+      setError(undefined);
+    } catch (e: unknown) {
+      console.error("Error adding entry:", e);
+
+      if (axios.isAxiosError(e)) {
+        console.error("Axios response:", e.response?.data);
+
+        const data = e.response?.data;
+
+        if (typeof data === "string") {
+          setError(data);
+        } else if (
+          typeof data === "object" &&
+          data !== null
+        ) {
+          if ("error" in data) {
+            const error = data.error;
+
+            if (Array.isArray(error)) {
+              setError(
+                error
+                  .map((item) => {
+                    if (
+                      typeof item === "object" &&
+                      item !== null &&
+                      "message" in item
+                    ) {
+                      return String(item.message);
+                    }
+
+                    return JSON.stringify(item);
+                  })
+                  .join(", ")
+              );
+            } else if (typeof error === "string") {
+              setError(error);
+            } else {
+              setError(JSON.stringify(error));
+            }
+          } else if ("message" in data) {
+            setError(String(data.message));
+          } else {
+            setError(JSON.stringify(data));
+          }
+        } else {
+          setError(
+            "Something went wrong when adding the entry"
+          );
+        }
+      } else if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError("Unknown error");
+      }
+    }
+  };
 
   if (!patient) {
     return <div>Loading...</div>;
@@ -67,7 +159,18 @@ const PatientPage = ({
         date of birth: {patient.dateOfBirth}
       </Typography>
 
-      <Typography variant="h5" sx={{ marginTop: "1em" }}>
+      <Button
+        variant="contained"
+        onClick={openModal}
+        sx={{ marginTop: 2 }}
+      >
+        Add Entry
+      </Button>
+
+      <Typography
+        variant="h5"
+        sx={{ marginTop: "1em" }}
+      >
         Entries
       </Typography>
 
@@ -99,7 +202,8 @@ const PatientPage = ({
 
                 return (
                   <li key={code}>
-                    {code} {diagnosis ? diagnosis.name : ""}
+                    {code}{" "}
+                    {diagnosis ? diagnosis.name : ""}
                   </li>
                 );
               })}
@@ -107,13 +211,25 @@ const PatientPage = ({
           )}
         </div>
       ))}
+
+      <AddEntryModal
+        modalOpen={modalOpen}
+        onClose={closeModal}
+        onSubmit={submitNewEntry}
+        error={error}
+      />
     </div>
   );
 };
 
 const App = () => {
-  const [patients, setPatients] = useState<NonSensitivePatient[]>([]);
-  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
+  const [patients, setPatients] = useState<
+    NonSensitivePatient[]
+  >([]);
+
+  const [diagnoses, setDiagnoses] = useState<
+    Diagnosis[]
+  >([]);
 
   useEffect(() => {
     void axios.get<void>(`${apiBaseUrl}/ping`);
@@ -139,7 +255,10 @@ const App = () => {
     <div className="App">
       <Router>
         <Container>
-          <Typography variant="h3" sx={{ marginBottom: "0.5em" }}>
+          <Typography
+            variant="h3"
+            sx={{ marginBottom: "0.5em" }}
+          >
             Patientor
           </Typography>
 
@@ -167,7 +286,9 @@ const App = () => {
 
             <Route
               path="/patients/:id"
-              element={<PatientPage diagnoses={diagnoses} />}
+              element={
+                <PatientPage diagnoses={diagnoses} />
+              }
             />
           </Routes>
         </Container>
