@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 
 import { apiBaseUrl } from "./constants";
+
 import {
   NonSensitivePatient,
   Patient,
@@ -27,15 +28,15 @@ import EntryDetails from "./components/EntryDetails";
 import AddEntryModal from "./components/AddEntryModal";
 import { NewHealthCheckEntryValues } from "./components/AddEntryForm";
 
-const PatientPage = ({
-  diagnoses,
-}: {
+interface PatientPageProps {
   diagnoses: Diagnosis[];
-}) => {
+}
+
+const PatientPage = ({ diagnoses }: PatientPageProps) => {
   const { id } = useParams<{ id: string }>();
 
   const [patient, setPatient] = useState<Patient>();
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
   useEffect(() => {
@@ -44,29 +45,33 @@ const PatientPage = ({
         return;
       }
 
-      const response = await axios.get<Patient>(
-        `${apiBaseUrl}/patients/${id}`
-      );
+      try {
+        const response = await axios.get<Patient>(
+          `${apiBaseUrl}/patients/${id}`
+        );
 
-      setPatient(response.data);
+        setPatient(response.data);
+      } catch (e: unknown) {
+        console.error("Error fetching patient:", e);
+      }
     };
 
     void fetchPatient();
   }, [id]);
 
-  const openModal = () => {
+  const openModal = (): void => {
     setModalOpen(true);
     setError(undefined);
   };
 
-  const closeModal = () => {
+  const closeModal = (): void => {
     setModalOpen(false);
     setError(undefined);
   };
 
   const submitNewEntry = async (
     values: NewHealthCheckEntryValues
-  ) => {
+  ): Promise<void> => {
     if (!id) {
       return;
     }
@@ -95,11 +100,11 @@ const PatientPage = ({
           data !== null
         ) {
           if ("error" in data) {
-            const error = data.error;
+            const errorData = data.error;
 
-            if (Array.isArray(error)) {
+            if (Array.isArray(errorData)) {
               setError(
-                error
+                errorData
                   .map((item) => {
                     if (
                       typeof item === "object" &&
@@ -113,10 +118,10 @@ const PatientPage = ({
                   })
                   .join(", ")
               );
-            } else if (typeof error === "string") {
-              setError(error);
+            } else if (typeof errorData === "string") {
+              setError(errorData);
             } else {
-              setError(JSON.stringify(error));
+              setError(JSON.stringify(errorData));
             }
           } else if ("message" in data) {
             setError(String(data.message));
@@ -159,12 +164,13 @@ const PatientPage = ({
         date of birth: {patient.dateOfBirth}
       </Typography>
 
+      {/* This text must match the Playwright test */}
       <Button
         variant="contained"
         onClick={openModal}
         sx={{ marginTop: 2 }}
       >
-        Add Entry
+        Add New Entry
       </Button>
 
       <Typography
@@ -175,7 +181,9 @@ const PatientPage = ({
       </Typography>
 
       {patient.entries.length === 0 && (
-        <Typography>No entries yet.</Typography>
+        <Typography>
+          No entries yet.
+        </Typography>
       )}
 
       {patient.entries.map((entry) => (
@@ -188,7 +196,8 @@ const PatientPage = ({
           }}
         >
           <Typography>
-            {entry.date} <i>{entry.description}</i>
+            {entry.date}{" "}
+            <i>{entry.description}</i>
           </Typography>
 
           <EntryDetails entry={entry} />
@@ -203,7 +212,9 @@ const PatientPage = ({
                 return (
                   <li key={code}>
                     {code}{" "}
-                    {diagnosis ? diagnosis.name : ""}
+                    {diagnosis
+                      ? diagnosis.name
+                      : ""}
                   </li>
                 );
               })}
@@ -235,16 +246,30 @@ const App = () => {
     void axios.get(`${apiBaseUrl}/ping`);
 
     const fetchPatientList = async () => {
-      const patients = await patientService.getAll();
-      setPatients(patients);
+      try {
+        const patients = await patientService.getAll();
+        setPatients(patients);
+      } catch (e: unknown) {
+        console.error(
+          "Error fetching patients:",
+          e
+        );
+      }
     };
 
     const fetchDiagnoses = async () => {
-      const response = await axios.get<Diagnosis[]>(
-        `${apiBaseUrl}/diagnoses`
-      );
+      try {
+        const response = await axios.get<Diagnosis[]>(
+          `${apiBaseUrl}/diagnoses`
+        );
 
-      setDiagnoses(response.data);
+        setDiagnoses(response.data);
+      } catch (e: unknown) {
+        console.error(
+          "Error fetching diagnoses:",
+          e
+        );
+      }
     };
 
     void fetchPatientList();
@@ -287,7 +312,9 @@ const App = () => {
             <Route
               path="/patients/:id"
               element={
-                <PatientPage diagnoses={diagnoses} />
+                <PatientPage
+                  diagnoses={diagnoses}
+                />
               }
             />
           </Routes>

@@ -10,11 +10,11 @@ import { v1 as uuid } from "uuid";
 const patients: Patient[] = [
   {
     id: "1",
-    name: "John Doe",
-    occupation: "Engineer",
+    name: "John McClane",
+    occupation: "New york city cop",
     gender: "male",
-    ssn: "123-45-6789",
-    dateOfBirth: "1990-01-01",
+    ssn: "090786-122X",
+    dateOfBirth: "1970-01-01",
     entries: [
       {
         id: "entry-1",
@@ -30,11 +30,11 @@ const patients: Patient[] = [
         type: "Hospital",
         date: "2025-02-10",
         specialist: "Dr. House",
-        description: "Patient admitted for further examination.",
+        description: "Patient has a head trauma.",
         diagnosisCodes: ["S03.5"],
         discharge: {
           date: "2025-02-15",
-          criteria: "Patient has recovered and can return home.",
+          criteria: "Thumb has healed",
         },
       },
       {
@@ -54,7 +54,7 @@ const patients: Patient[] = [
   },
   {
     id: "2",
-    name: "Jane Smith",
+    name: "Martin Riggs",
     occupation: "Teacher",
     gender: "female",
     ssn: "987-65-4321",
@@ -95,7 +95,10 @@ const isGender = (param: unknown): param is Patient["gender"] =>
   typeof param === "string" &&
   ["male", "female", "other"].includes(param);
 
-const parseStringField = (value: unknown, fieldName: string): string => {
+const parseStringField = (
+  value: unknown,
+  fieldName: string
+): string => {
   if (!isString(value)) {
     throw new Error(`Missing or invalid ${fieldName}`);
   }
@@ -103,7 +106,9 @@ const parseStringField = (value: unknown, fieldName: string): string => {
   return value;
 };
 
-const parseGender = (gender: unknown): Patient["gender"] => {
+const parseGender = (
+  gender: unknown
+): Patient["gender"] => {
   if (!isGender(gender)) {
     throw new Error("Missing or invalid gender");
   }
@@ -111,7 +116,9 @@ const parseGender = (gender: unknown): Patient["gender"] => {
   return gender;
 };
 
-const toNewPatient = (object: unknown): NewPatient => {
+const toNewPatient = (
+  object: unknown
+): NewPatient => {
   if (!object || typeof object !== "object") {
     throw new Error("Invalid patient data");
   }
@@ -119,34 +126,58 @@ const toNewPatient = (object: unknown): NewPatient => {
   const entry = object as Record<string, unknown>;
 
   return {
-    name: parseStringField(entry.name, "name"),
-    dateOfBirth: parseStringField(entry.dateOfBirth, "dateOfBirth"),
-    ssn: parseStringField(entry.ssn, "ssn"),
+    name: parseStringField(
+      entry.name,
+      "name"
+    ),
+    dateOfBirth: parseStringField(
+      entry.dateOfBirth,
+      "dateOfBirth"
+    ),
+    ssn: parseStringField(
+      entry.ssn,
+      "ssn"
+    ),
     gender: parseGender(entry.gender),
-    occupation: parseStringField(entry.occupation, "occupation"),
+    occupation: parseStringField(
+      entry.occupation,
+      "occupation"
+    ),
   };
 };
 
-const getPatients = (): Patient[] => patients;
-
-const getNonSensitivePatients = (): NonSensitivePatient[] => {
-  return patients.map((patient) => ({
-    id: patient.id,
-    name: patient.name,
-    occupation: patient.occupation,
-    gender: patient.gender,
-    dateOfBirth: patient.dateOfBirth,
-  }));
+const getPatients = (): Patient[] => {
+  return patients;
 };
 
-const getPatientById = (id: string): Patient | undefined => {
-  return patients.find((patient) => patient.id === id);
+const getNonSensitivePatients =
+  (): NonSensitivePatient[] => {
+    return patients.map((patient) => ({
+      id: patient.id,
+      name: patient.name,
+      occupation: patient.occupation,
+      gender: patient.gender,
+      dateOfBirth: patient.dateOfBirth,
+    }));
+  };
+
+const getPatientById = (
+  id: string
+): Patient | undefined => {
+  return patients.find(
+    (patient) => patient.id === id
+  );
 };
 
-const getDiagnoses = () => diagnoses;
+const getDiagnoses = () => {
+  return diagnoses;
+};
 
-const addPatient = (patient: NewPatient): Patient => {
-  const newPatientEntry = toNewPatient(patient);
+const addPatient = (
+  patient: NewPatient
+): Patient => {
+  const newPatientEntry =
+    toNewPatient(patient);
 
   const newPatient: Patient = {
     id: uuid(),
@@ -159,8 +190,13 @@ const addPatient = (patient: NewPatient): Patient => {
   return newPatient;
 };
 
-const addEntry = (patientId: string, entry: NewEntry): Patient | undefined => {
-  const patient = patients.find((patient) => patient.id === patientId);
+const addEntry = (
+  patientId: string,
+  entry: NewEntry
+): Patient | undefined => {
+  const patient = patients.find(
+    (patient) => patient.id === patientId
+  );
 
   if (!patient) {
     return undefined;
