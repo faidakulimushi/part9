@@ -5,10 +5,14 @@ import express, {
 } from "express";
 import cors from "cors";
 import { z } from "zod";
+
 import patientService from "./services/patientService";
+
 import {
   NewPatientSchema,
   type NewPatient,
+  NewEntrySchema,
+  type NewEntry,
 } from "./types";
 
 const app = express();
@@ -59,6 +63,46 @@ app.post(
   (req: Request<unknown, unknown, NewPatient>, res: Response) => {
     const newPatient = patientService.addPatient(req.body);
     res.json(newPatient);
+  }
+);
+
+const newEntryParser = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  try {
+    NewEntrySchema.parse(req.body);
+    next();
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+app.post(
+  "/api/patients/:id/entries",
+  newEntryParser,
+  (
+    req: Request<
+      { id: string },
+      unknown,
+      NewEntry
+    >,
+    res: Response
+  ) => {
+    const patient = patientService.addEntry(
+      req.params.id,
+      req.body
+    );
+
+    if (!patient) {
+      res.status(404).send({
+        error: "Patient not found",
+      });
+      return;
+    }
+
+    res.json(patient);
   }
 );
 

@@ -77,3 +77,54 @@ export const NewPatientSchema = z.object({
 });
 
 export type NewPatient = z.infer<typeof NewPatientSchema>;
+
+// Base validation for all new entries
+const BaseEntrySchema = z.object({
+  description: z.string(),
+  date: z.string(),
+  specialist: z.string(),
+  diagnosisCodes: z.array(z.string()).optional(),
+});
+
+// Hospital entry
+const NewHospitalEntrySchema = BaseEntrySchema.extend({
+  type: z.literal("Hospital"),
+  discharge: z.object({
+    date: z.string(),
+    criteria: z.string(),
+  }),
+});
+
+// Occupational healthcare entry
+const NewOccupationalHealthcareEntrySchema = BaseEntrySchema.extend({
+  type: z.literal("OccupationalHealthcare"),
+  employerName: z.string(),
+  sickLeave: z
+    .object({
+      startDate: z.string(),
+      endDate: z.string(),
+    })
+    .optional(),
+});
+
+// Health check entry
+const HealthCheckRatingSchema = z.union([
+  z.literal(HealthCheckRating.Healthy),
+  z.literal(HealthCheckRating.LowRisk),
+  z.literal(HealthCheckRating.HighRisk),
+  z.literal(HealthCheckRating.CriticalRisk),
+]);
+
+const NewHealthCheckEntrySchema = BaseEntrySchema.extend({
+  type: z.literal("HealthCheck"),
+  healthCheckRating: HealthCheckRatingSchema,
+});
+
+// Accept any of the three entry types
+export const NewEntrySchema = z.discriminatedUnion("type", [
+  NewHospitalEntrySchema,
+  NewOccupationalHealthcareEntrySchema,
+  NewHealthCheckEntrySchema,
+]);
+
+export type NewEntry = z.infer<typeof NewEntrySchema>;
