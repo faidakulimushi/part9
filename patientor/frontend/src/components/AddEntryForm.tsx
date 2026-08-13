@@ -10,308 +10,269 @@ import {
   Typography,
 } from "@mui/material";
 
-export type EntryType =
-  | "HealthCheck"
-  | "OccupationalHealthcare"
-  | "Hospital";
-
-export interface NewEntryValues {
-  type: EntryType;
+export interface NewHealthCheckEntryValues {
+  type: "HealthCheck";
   date: string;
   specialist: string;
   description: string;
   diagnosisCodes?: string[];
-
-  healthCheckRating?: number;
-
-  employerName?: string;
-
-  sickLeave?: {
-    startDate: string;
-    endDate: string;
-  };
-
-  discharge?: {
-    date: string;
-    criteria: string;
-  };
+  healthCheckRating: number;
 }
 
 interface Props {
-  onSubmit: (values: NewEntryValues) => void;
+  onSubmit: (values: NewHealthCheckEntryValues) => void;
   onCancel: () => void;
 }
 
-const AddEntryForm = ({ onSubmit, onCancel }: Props) => {
-  const [type, setType] =
-    useState<EntryType>("HealthCheck");
-
+const HealthCheckEntryForm = ({ onSubmit, onCancel }: Props) => {
   const [date, setDate] = useState("");
   const [specialist, setSpecialist] = useState("");
   const [description, setDescription] = useState("");
   const [diagnosisCodes, setDiagnosisCodes] = useState("");
+  const [healthCheckRating, setHealthCheckRating] = useState("");
 
-  const [healthCheckRating, setHealthCheckRating] =
-    useState("");
+  const [dateError, setDateError] = useState("");
+  const [specialistError, setSpecialistError] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
+  const [diagnosisError, setDiagnosisError] = useState("");
+  const [ratingError, setRatingError] = useState("");
 
-  const [employerName, setEmployerName] =
-    useState("");
+  const validateDate = (value: string) => {
+    if (!value) {
+      return "Date is required";
+    }
 
-  const [sickLeaveStartDate, setSickLeaveStartDate] =
-    useState("");
+    const dateObject = new Date(value);
 
-  const [sickLeaveEndDate, setSickLeaveEndDate] =
-    useState("");
+    if (Number.isNaN(dateObject.getTime())) {
+      return "Date must be valid";
+    }
 
-  const [dischargeDate, setDischargeDate] =
-    useState("");
+    return "";
+  };
 
-  const [dischargeCriteria, setDischargeCriteria] =
-    useState("");
+  const validateSpecialist = (value: string) => {
+    if (!value.trim()) {
+      return "Specialist is required";
+    }
 
-  const submit = (event: React.SyntheticEvent) => {
+    return "";
+  };
+
+  const validateDescription = (value: string) => {
+    if (!value.trim()) {
+      return "Description is required";
+    }
+
+    return "";
+  };
+
+  const validateDiagnosisCodes = (value: string) => {
+    if (!value.trim()) {
+      return "";
+    }
+
+    const codes = value
+      .split(",")
+      .map((code) => code.trim())
+      .filter((code) => code.length > 0);
+
+    const icd10Regex = /^[A-Z][0-9]{2}(\.[0-9A-Z]{1,4})?$/i;
+
+    const invalidCodes = codes.filter(
+      (code) => !icd10Regex.test(code)
+    );
+
+    if (invalidCodes.length > 0) {
+      return `Invalid diagnosis code(s): ${invalidCodes.join(", ")}`;
+    }
+
+    return "";
+  };
+
+  const validateRating = (value: string) => {
+    if (value === "") {
+      return "Health check rating is required";
+    }
+
+    const rating = Number(value);
+
+    if (!Number.isInteger(rating) || rating < 0 || rating > 3) {
+      return "Health check rating must be between 0 and 3";
+    }
+
+    return "";
+  };
+
+  const submit = (event: React.FormEvent) => {
     event.preventDefault();
+
+    const newDateError = validateDate(date);
+    const newSpecialistError = validateSpecialist(specialist);
+    const newDescriptionError = validateDescription(description);
+    const newDiagnosisError = validateDiagnosisCodes(diagnosisCodes);
+    const newRatingError = validateRating(healthCheckRating);
+
+    setDateError(newDateError);
+    setSpecialistError(newSpecialistError);
+    setDescriptionError(newDescriptionError);
+    setDiagnosisError(newDiagnosisError);
+    setRatingError(newRatingError);
+
+    if (
+      newDateError ||
+      newSpecialistError ||
+      newDescriptionError ||
+      newDiagnosisError ||
+      newRatingError
+    ) {
+      return;
+    }
 
     const codes = diagnosisCodes
       .split(",")
       .map((code) => code.trim())
       .filter((code) => code.length > 0);
 
-    const baseValues = {
-      date,
-      specialist,
-      description,
-      diagnosisCodes:
-        codes.length > 0 ? codes : undefined,
-    };
-
-    if (type === "HealthCheck") {
-      const rating = Number(healthCheckRating);
-
-      if (
-        !Number.isInteger(rating) ||
-        rating < 0 ||
-        rating > 3
-      ) {
-        return;
-      }
-
-      onSubmit({
-        ...baseValues,
-        type: "HealthCheck",
-        healthCheckRating: rating,
-      });
-
-      return;
-    }
-
-    if (type === "OccupationalHealthcare") {
-      onSubmit({
-        ...baseValues,
-        type: "OccupationalHealthcare",
-        employerName,
-        sickLeave:
-          sickLeaveStartDate && sickLeaveEndDate
-            ? {
-                startDate: sickLeaveStartDate,
-                endDate: sickLeaveEndDate,
-              }
-            : undefined,
-      });
-
-      return;
-    }
-
     onSubmit({
-      ...baseValues,
-      type: "Hospital",
-      discharge: {
-        date: dischargeDate,
-        criteria: dischargeCriteria,
-      },
+      type: "HealthCheck",
+      date,
+      specialist: specialist.trim(),
+      description: description.trim(),
+      diagnosisCodes: codes,
+      healthCheckRating: Number(healthCheckRating),
     });
   };
 
   return (
-    <Box component="form" onSubmit={submit}>
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Entry type</InputLabel>
-
-        <Select
-          value={type}
-          label="Entry type"
-          onChange={(event) =>
-            setType(event.target.value as EntryType)
-          }
-        >
-          <MenuItem value="HealthCheck">
-            Health Check
-          </MenuItem>
-
-          <MenuItem value="OccupationalHealthcare">
-            Occupational Healthcare
-          </MenuItem>
-
-          <MenuItem value="Hospital">
-            Hospital
-          </MenuItem>
-        </Select>
-      </FormControl>
-
+    <Box
+      component="form"
+      onSubmit={submit}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
       <TextField
-        fullWidth
-        margin="normal"
         label="Date"
+        type="date"
         value={date}
-        onChange={({ target }) => setDate(target.value)}
+        onChange={(event) => {
+          setDate(event.target.value);
+          setDateError(validateDate(event.target.value));
+        }}
+        InputLabelProps={{
+          shrink: true,
+        }}
+        error={Boolean(dateError)}
+        helperText={dateError}
+        required
       />
 
       <TextField
-        fullWidth
-        margin="normal"
         label="Specialist"
         value={specialist}
-        onChange={({ target }) =>
-          setSpecialist(target.value)
-        }
+        onChange={(event) => {
+          setSpecialist(event.target.value);
+          setSpecialistError(
+            validateSpecialist(event.target.value)
+          );
+        }}
+        error={Boolean(specialistError)}
+        helperText={specialistError}
+        required
       />
 
       <TextField
-        fullWidth
-        margin="normal"
         label="Description"
         value={description}
-        onChange={({ target }) =>
-          setDescription(target.value)
-        }
+        onChange={(event) => {
+          setDescription(event.target.value);
+          setDescriptionError(
+            validateDescription(event.target.value)
+          );
+        }}
+        error={Boolean(descriptionError)}
+        helperText={descriptionError}
+        required
+        multiline
+        rows={3}
       />
 
       <TextField
-        fullWidth
-        margin="normal"
         label="Diagnosis codes"
-        placeholder="M24.2, S03.5"
         value={diagnosisCodes}
-        onChange={({ target }) =>
-          setDiagnosisCodes(target.value)
+        onChange={(event) => {
+          setDiagnosisCodes(event.target.value);
+          setDiagnosisError(
+            validateDiagnosisCodes(event.target.value)
+          );
+        }}
+        error={Boolean(diagnosisError)}
+        helperText={
+          diagnosisError ||
+          "Use valid ICD-10 codes separated by commas, e.g. J20.9, A00"
         }
       />
 
-      {type === "HealthCheck" && (
-        <>
+      <Typography variant="h6">
+        Health Check information
+      </Typography>
+
+      <FormControl
+        required
+        error={Boolean(ratingError)}
+      >
+        <InputLabel id="health-check-rating-label">
+          Health check rating (0-3)
+        </InputLabel>
+
+        <Select
+          labelId="health-check-rating-label"
+          value={healthCheckRating}
+          label="Health check rating (0-3)"
+          onChange={(event) => {
+            const value = event.target.value;
+            setHealthCheckRating(value);
+            setRatingError(validateRating(value));
+          }}
+        >
+          <MenuItem value={0}>0</MenuItem>
+          <MenuItem value={1}>1</MenuItem>
+          <MenuItem value={2}>2</MenuItem>
+          <MenuItem value={3}>3</MenuItem>
+        </Select>
+
+        {ratingError && (
           <Typography
-            variant="subtitle1"
-            sx={{ marginTop: 2 }}
+            color="error"
+            variant="caption"
+            sx={{ marginLeft: 2, marginTop: 0.5 }}
           >
-            Health Check information
+            {ratingError}
           </Typography>
+        )}
+      </FormControl>
 
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Health check rating (0-3)"
-            type="number"
-            inputProps={{
-              min: 0,
-              max: 3,
-              step: 1,
-            }}
-            value={healthCheckRating}
-            onChange={({ target }) =>
-              setHealthCheckRating(target.value)
-            }
-          />
-        </>
-      )}
-
-      {type === "OccupationalHealthcare" && (
-        <>
-          <Typography
-            variant="subtitle1"
-            sx={{ marginTop: 2 }}
-          >
-            Occupational Healthcare information
-          </Typography>
-
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Employer name"
-            value={employerName}
-            onChange={({ target }) =>
-              setEmployerName(target.value)
-            }
-          />
-
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Sick leave start date"
-            value={sickLeaveStartDate}
-            onChange={({ target }) =>
-              setSickLeaveStartDate(target.value)
-            }
-          />
-
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Sick leave end date"
-            value={sickLeaveEndDate}
-            onChange={({ target }) =>
-              setSickLeaveEndDate(target.value)
-            }
-          />
-        </>
-      )}
-
-      {type === "Hospital" && (
-        <>
-          <Typography
-            variant="subtitle1"
-            sx={{ marginTop: 2 }}
-          >
-            Hospital information
-          </Typography>
-
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Discharge date"
-            value={dischargeDate}
-            onChange={({ target }) =>
-              setDischargeDate(target.value)
-            }
-          />
-
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Discharge criteria"
-            value={dischargeCriteria}
-            onChange={({ target }) =>
-              setDischargeCriteria(target.value)
-            }
-          />
-        </>
-      )}
-
-      <Box sx={{ marginTop: 2 }}>
-        <Button type="submit" variant="contained">
-          Add
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <Button
+          variant="contained"
+          type="submit"
+        >
+          ADD
         </Button>
 
         <Button
-          type="button"
           variant="outlined"
+          type="button"
           onClick={onCancel}
-          sx={{ marginLeft: 1 }}
         >
-          Cancel
+          CANCEL
         </Button>
       </Box>
     </Box>
   );
 };
 
-export default AddEntryForm;
+export default HealthCheckEntryForm;
