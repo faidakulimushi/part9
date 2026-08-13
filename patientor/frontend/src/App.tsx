@@ -65,6 +65,22 @@ const PatientPage = () => {
       {patient.entries.length === 0 && (
         <Typography>No entries yet.</Typography>
       )}
+
+      {patient.entries.map((entry) => (
+        <div key={entry.id}>
+          <Typography>
+            {entry.date} <i>{entry.description}</i>
+          </Typography>
+
+          {entry.diagnosisCodes && (
+            <ul>
+              {entry.diagnosisCodes.map((code) => (
+                <li key={code}>{code}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
     </div>
   );
 };
