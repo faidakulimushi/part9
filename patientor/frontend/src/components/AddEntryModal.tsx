@@ -7,13 +7,13 @@ import {
 } from "@mui/material";
 
 import AddEntryForm, {
-  NewEntryValues,
+  NewHealthCheckEntryValues,
 } from "./AddEntryForm";
 
 interface Props {
   modalOpen: boolean;
   onClose: () => void;
-  onSubmit: (values: NewEntryValues) => void;
+  onSubmit: (values: NewHealthCheckEntryValues) => void;
   error?: string;
 }
 
