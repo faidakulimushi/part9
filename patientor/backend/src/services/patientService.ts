@@ -1,4 +1,9 @@
- import { Patient, NonSensitivePatient, NewPatient } from "../types";
+import {
+  Patient,
+  NonSensitivePatient,
+  NewPatient,
+  HealthCheckRating,
+} from "../types";
 import { v1 as uuid } from "uuid";
 
 const patients: Patient[] = [
@@ -9,7 +14,42 @@ const patients: Patient[] = [
     gender: "male",
     ssn: "123-45-6789",
     dateOfBirth: "1990-01-01",
-    entries: [],
+    entries: [
+      {
+        id: "entry-1",
+        type: "HealthCheck",
+        date: "2025-01-15",
+        specialist: "Dr. Smith",
+        description: "Annual health check. Patient is feeling well.",
+        diagnosisCodes: ["M24.2"],
+        healthCheckRating: HealthCheckRating.Healthy,
+      },
+      {
+        id: "entry-2",
+        type: "Hospital",
+        date: "2025-02-10",
+        specialist: "Dr. House",
+        description: "Patient admitted for further examination.",
+        diagnosisCodes: ["S03.5"],
+        discharge: {
+          date: "2025-02-15",
+          criteria: "Patient has recovered and can return home.",
+        },
+      },
+      {
+        id: "entry-3",
+        type: "OccupationalHealthcare",
+        date: "2025-03-01",
+        specialist: "Dr. Wilson",
+        description: "Occupational health examination.",
+        diagnosisCodes: ["J10.1"],
+        employerName: "ABC Engineering Ltd",
+        sickLeave: {
+          startDate: "2025-03-02",
+          endDate: "2025-03-07",
+        },
+      },
+    ],
   },
   {
     id: "2",
@@ -18,7 +58,17 @@ const patients: Patient[] = [
     gender: "female",
     ssn: "987-65-4321",
     dateOfBirth: "1985-05-05",
-    entries: [],
+    entries: [
+      {
+        id: "entry-4",
+        type: "HealthCheck",
+        date: "2025-04-12",
+        specialist: "Dr. Adams",
+        description: "Routine health check.",
+        diagnosisCodes: ["M24.2"],
+        healthCheckRating: HealthCheckRating.LowRisk,
+      },
+    ],
   },
 ];
 

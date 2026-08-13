@@ -18,6 +18,7 @@ import {
 
 import patientService from "./services/patients";
 import PatientListPage from "./components/PatientListPage";
+import EntryDetails from "./components/EntryDetails";
 
 const PatientPage = ({
   diagnoses,
@@ -75,10 +76,19 @@ const PatientPage = ({
       )}
 
       {patient.entries.map((entry) => (
-        <div key={entry.id}>
+        <div
+          key={entry.id}
+          style={{
+            border: "1px solid #ccc",
+            padding: "1em",
+            marginBottom: "1em",
+          }}
+        >
           <Typography>
             {entry.date} <i>{entry.description}</i>
           </Typography>
+
+          <EntryDetails entry={entry} />
 
           {entry.diagnosisCodes && (
             <ul>
